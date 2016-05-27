@@ -1,0 +1,10 @@
+---
+- hosts:
+  - all
+  tasks:
+    - name: test
+      date:
+    - name: 引数あり
+      greet: name="Foo"
+    - name: 引数なし
+      greet:
