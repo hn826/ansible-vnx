@@ -24,6 +24,12 @@ def getspluns(user,password,address):
 
     return re.split(r'\n', re.sub('LOGICAL UNIT NUMBER ' , '', lunlist.rstrip('\n')))
 
+def addhlus(user,password,address,num):
+    unuseluns = getrgluns(user,password,address) + getspluns(user,password,address)
+    
+    for i in xrange(0, num):
+        commands.getoutput("/opt/Navisphere/bin/naviseccli -user " + user + " -password " + password + " -address " + address + " -scope 0 storagegroup -addhlu -gname TestMaskingSG -alu " + unuseluns[i] + " -hlu " + str(i) + "") 
+
 def main():
     module = AnsibleModule(
         argument_spec = dict(
@@ -35,6 +41,8 @@ def main():
     user = module.params['user']
     password = module.params['password']
     address = module.params['address']
+
+    addhlus(user,password,address,2)
 
     stdout = ""
 
