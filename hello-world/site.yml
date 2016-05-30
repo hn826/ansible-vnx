@@ -1,6 +1,6 @@
 ---
-- hosts:
-  - all
+- hosts: all
+  connection: local
   tasks:
     - name: test
       date:
@@ -8,3 +8,7 @@
       greet: name="Foo"
     - name: 引数なし
       greet:
+    - name: cmd
+      cmd: user=sysadmin password=sysadmin address={{ inventory_hostname }}
+    - name: get remote host ip address
+      command: echo {{ inventory_hostname }}
