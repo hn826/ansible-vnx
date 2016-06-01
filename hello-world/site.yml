@@ -9,6 +9,6 @@
     - name: 引数なし
       greet:
     - name: cmd
-      cmd: user=sysadmin password=sysadmin address={{ inventory_hostname }}
+      cmd: user=sysadmin password=sysadmin address={{ inventory_hostname }} num={{ num1 }}
     - name: get remote host ip address
       command: echo {{ inventory_hostname }}
