@@ -4,10 +4,11 @@
   vars:
        user: "sysadmin"
        password: "sysadmin"
-       sp: "10.32.2.144"
+       spa: "10.32.2.146"
+       spb: "10.32.2.145"
        gname: "TestMaskingSG"
   tasks:
      - name: Check LUN A
-       sglun: user={{ user }} password={{ password }} address={{ sp }} gname={{ gname }} query="0,5202:1,5032" noremove=True
+       sglun: user={{ user }} password={{ password }} spa={{ spa }} spb={{ spb }} gname={{ gname }} query="0,5202:1,5032"
      - name: Check LUN B
-       sglun: user={{ user }} password={{ password }} address={{ sp }} gname={{ gname }} query="1,5202:0,5032"
+       sglun: user={{ user }} password={{ password }} spa={{ spa }} spb={{ spb }} gname={{ gname }} query="1,5202:0,5032" noremove=True

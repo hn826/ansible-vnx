@@ -6,6 +6,14 @@ import re
 from string import *
 from ansible.module_utils.basic import *
 
+def checkSp(user,password,spa,spb):
+    naviseccli_path = "/opt/Navisphere/bin/naviseccli"
+    (rc, out, err) = module.run_command('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (naviseccli_path, user, password, spa))
+    if rc == 0:
+        return spa
+    else:
+        return spb
+
 def getPairs(gname):
     (rc, out, err) = module.run_command('%s storagegroup -list -gname %s' % (naviseccli, gname), check_rc=True)
     retlist = []
@@ -38,7 +46,8 @@ def main():
         argument_spec = dict(
             user = dict(required=True),
             password = dict(required=True),
-            address = dict(required=True),
+            spa = dict(required=True),
+            spb = dict(required=True),
             query = dict(required=True),
             gname = dict(required=True),
             noremove = dict(default=False, required=False, type='bool')
@@ -46,10 +55,14 @@ def main():
     )
     user = module.params['user']
     password = module.params['password']
-    address = module.params['address']
+    spa = module.params['spa']
+    spb = module.params['spb']
     query = module.params['query']
     gname = module.params['gname']
     noremove = module.params['noremove']
+
+    ### Check SP
+    address = checkSp(user,password,spa,spb) 
 
     ### Set Global Variable naviseccli
     global naviseccli
