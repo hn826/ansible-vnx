@@ -5,8 +5,9 @@
        user: "sysadmin"
        password: "sysadmin"
        sp: "10.32.2.144"
+       gname: "TestMaskingSG"
   tasks:
      - name: Check LUN A
-       sglun: user={{ user }} password={{ password }} address={{ sp }} query="0,5202:1,5032"
+       sglun: user={{ user }} password={{ password }} address={{ sp }} gname={{ gname }} query="0,5202:1,5032" noremove=True
      - name: Check LUN B
-       sglun: user={{ user }} password={{ password }} address={{ sp }} query="1,5202:0,5032"
+       sglun: user={{ user }} password={{ password }} address={{ sp }} gname={{ gname }} query="1,5202:0,5032"
