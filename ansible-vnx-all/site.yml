@@ -1,0 +1,11 @@
+- hosts: all
+  name: "Common Settings"
+  roles:
+    - common
+  tags: common
+
+- hosts: vnxmgmt
+  name: "VNX Configuration Management"
+  roles:
+    - role_vnx
+  tags: role_vnx

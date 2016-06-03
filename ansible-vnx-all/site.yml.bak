@@ -1,0 +1,7 @@
+---
+- hosts: all
+  tasks:
+     - name: Check LUN A
+       sglun: user={{ user }} password={{ password }} spa={{ spa }} spb={{ spb }} gname={{ gname }} query="0,5202:1,5032"
+     - name: Check LUN B
+       sglun: user={{ user }} password={{ password }} spa={{ spa }} spb={{ spb }} gname={{ gname }} query="1,5202:0,5032" noremove=True

@@ -1,0 +1,4 @@
+---
+- name: test
+  debug: msg="spa {{ item.spa }} spb {{ item.spb }}"
+  with_items: "{{ vnx }}"
