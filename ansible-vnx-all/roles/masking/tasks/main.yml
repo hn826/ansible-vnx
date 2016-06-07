@@ -1,0 +1,10 @@
+---
+- name: Debug task
+  debug: msg="{{ item.0.serial }}/{{ item.1.gname }}"
+  with_subelements: "{{ elements }}"
+  when: item.1.hlualu is defined
+
+- name: HLU/ALU Assign
+  sglun: user={{ item.0.user }} password={{ item.0.password }} spa={{ item.0.spa }} spb={{ item.0.spb }} gname={{ item.1.gname }} query={{ item.1.hlualu }}
+  with_subelements: "{{ elements }}"
+  when: item.1.hlualu is defined

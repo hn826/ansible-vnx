@@ -1,13 +1,20 @@
 ---
 # file: host_vars/admin.nsdom.local
 vnx:
-  - user: "sysadmin"
+  - serial: "CKM00111000126"
+    user: "sysadmin"
     password: "sysadmin"
     spa: "10.32.2.144"
     spb: "10.32.2.145"
-    gname: "TestMaskingSG"
-  - user: "sysadmin"
+    storagegroup: 
+      - gname: "TestMaskingSG"
+        hlualu: "0,5202:1,5032"
+      - gname: "TestMaskingSG2"
+  - serial: "CKM00111000127"
+    user: "sysadmin"
     password: "sysadmin"
     spa: "10.32.2.146"
     spb: "10.32.2.147"
-    gname: "TestMaskingSG"
+    storagegroup:
+      - gname: "TestMaskingSG3"
+      - gname: "TestMaskingSG4"
