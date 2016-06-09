@@ -22,22 +22,41 @@ def getPairs(gname):
             retlist.append(re.sub(r' +', ',', re.sub(r'    ', '', re.search(r'^    .*', l).group())))
     return retlist
 
+def getMaintainPairs(query,gname):
+    pairs = getPairs(gname)
+    maintainlist = []
+    for i in query:
+        for j in pairs:
+            if i == j:
+                maintainlist.append(j)
+    return maintainlist
+
 def parseQuery(query):
     return re.split(r':', query)
 
 def removeHlus(query,gname):
-    for i in query:
-        pairs = getPairs(gname)
-        for j in pairs:
-            if i != j:
-                hlu = (re.split(r',' , j))[0]
-                (rc, out, err) = module.run_command('%s storagegroup -removehlu -gname %s -hlu %s -o' % (naviseccli, gname, hlu), check_rc=True)
+    removelist = list(set(getPairs(gname)) - set(getMaintainPairs(query,gname)))
+    if not removelist:
+        return 0
+
+    for i in removelist:
+        hlu = (re.split(r',' , i))[0]
+        (rc, out, err) = module.run_command('%s storagegroup -removehlu -gname %s -hlu %s -o' % (naviseccli, gname, hlu), check_rc=True)
+
+    return 1
 
 def addHlus(query,gname):
-    for i in query:
-        hlu = (re.split(r',' , i))[0]
-        alu = (re.split(r',' , i))[1]
-        (rc, out, err) = module.run_command('%s storagegroup -addhlu -gname %s -hlu %s -alu %s' % (naviseccli, gname, hlu, alu), check_rc=True)
+    addlist = filter(lambda s:s != '', list(set(query) - set(getMaintainPairs(query,gname))))
+    if not addlist:
+        return 0
+
+    for i in addlist:
+        if i != "":
+            hlu = (re.split(r',' , i))[0]
+            alu = (re.split(r',' , i))[1]
+            (rc, out, err) = module.run_command('%s storagegroup -addhlu -gname %s -hlu %s -alu %s' % (naviseccli, gname, hlu, alu), check_rc=True)
+
+    return 1
 
 def main():
     ### Parse Arguments
@@ -68,17 +87,25 @@ def main():
     global naviseccli
     naviseccli = "/opt/Navisphere/bin/naviseccli -user " + user + " -password " + password + " -address " + address + " -scope 0"
 
+    rc = 0
+
     ### Remove Phase
     if not noremove:
-        removeHlus(parseQuery(query),gname)
+        rc += removeHlus(parseQuery(query),gname)
 
     ### Add Phase
-    addHlus(parseQuery(query),gname)
+    rc += addHlus(parseQuery(query),gname)
 
-    res_args = dict(
-        changed = True, pair = getPairs(gname)
-    )
-    module.exit_json(**res_args)
+    if rc:
+        res_args = dict(
+            changed = True, pair = getPairs(gname)
+        )
+        module.exit_json(**res_args)
+    else:
+        res_args = dict(
+            changed = False, pair = getPairs(gname)
+        )
+        module.exit_json(**res_args)
 
 if __name__ == '__main__':
     main()

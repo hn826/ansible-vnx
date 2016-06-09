@@ -1,3 +1,10 @@
+---
+- hosts: vnxmgmt
+  name: "Health Check"
+  roles:
+    - health_check
+  tags: health_check
+
 - hosts: vnxmgmt
   name: "Masking Configuration"
   roles:
