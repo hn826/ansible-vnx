@@ -1,0 +1,16 @@
+---
+- name: Check Faults List
+  faultschk: user={{ item.user }} password={{ item.password }} spa={{ item.spa }} spb={{ item.spb }}
+  with_items: "{{ elements }}"
+
+- name: Hardware Check
+  hwchk: user={{ item.user }} password={{ item.password }} spa={{ item.spa }} spb={{ item.spb }}
+  with_items: "{{ elements }}"
+
+- name: Cache Check
+  cachechk: user={{ item.user }} password={{ item.password }} spa={{ item.spa }} spb={{ item.spb }}
+  with_items: "{{ elements }}"
+
+- name: Disk Check
+  diskchk: user={{ item.user }} password={{ item.password }} spa={{ item.spa }} spb={{ item.spb }}
+  with_items: "{{ elements }}"
