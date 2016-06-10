@@ -1,46 +1,55 @@
 #!/usr/bin/python
 
-import commands
 import re
 
 from string import *
 from ansible.module_utils.basic import *
 
-def checkSp(user,password,spa,spb):
-    naviseccli_path = "/opt/Navisphere/bin/naviseccli"
-    (rc, out, err) = module.run_command('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (naviseccli_path, user, password, spa))
+def runCommand(cmd):
+    (rc, out, err) = module.run_command(cmd)
+    if not rc:
+        module.log("OK " + cmd)
+        return (rc, out, err)
+    else:
+        module.log("FAILED " + cmd + " " + out)
+        module.fail_json(msg="FAILED " + cmd + " " + out)
+
+def checkSp(nscli,user,password,spa,spb):
+    (rc, out, err) = runCommand('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (nscli, user, password, spa))
     if rc == 0:
         return spa
     else:
         return spb
 
+def getNaviseccliCommand(nscli,user,password,spa,spb):
+    return ('%s -user %s -password %s -address %s -scope 0' % (nscli, user, password, checkSp(nscli,user,password,spa,spb)))
+
 def checkDisk():
-    (rc, out, err) = module.run_command('%s getdisk -state' % (naviseccli), check_rc=True)
+    (rc, out, err) = runCommand('%s getdisk -state' % (naviseccli))
     if re.search('Fault', out):
-        module.fail_json(msg='Disk Check Failed')
+        module.fail_json(msg='FAILED Disk Check ' + cmd + ' ' + out)
         
 def main():
     ### Parse Arguments
     global module
     module = AnsibleModule(
         argument_spec = dict(
+            nscli = dict(default="/opt/Navisphere/bin/naviseccli", required=False),
             user = dict(required=True),
             password = dict(required=True),
             spa = dict(required=True),
             spb = dict(required=True),
         ),
     )
+    nscli = module.params['nscli']
     user = module.params['user']
     password = module.params['password']
     spa = module.params['spa']
     spb = module.params['spb']
 
-    ### Check SP
-    address = checkSp(user,password,spa,spb) 
-
     ### Set Global Variable naviseccli
     global naviseccli
-    naviseccli = "/opt/Navisphere/bin/naviseccli -user " + user + " -password " + password + " -address " + address + " -scope 0"
+    naviseccli = getNaviseccliCommand(nscli,user,password,spa,spb)
 
     ### Check Disk
     checkDisk()

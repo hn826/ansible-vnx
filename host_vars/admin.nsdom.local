@@ -8,8 +8,8 @@ vnx:
     spb: "10.32.2.145"
     storagegroup: 
       - gname: "TestMaskingSG"
-#        hlualu: "0,5202:1,5032"
-        hlualu: ""
+        hlualu: "0,5202:1,5031:2,5032:3,9999"
+#        hlualu: ""
 #        hosts: "nakagy:nsesx02.nsdom.local"
         hosts: ""
       - gname: "TestMaskingSG2"

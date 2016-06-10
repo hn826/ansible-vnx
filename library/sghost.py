@@ -1,21 +1,31 @@
 #!/usr/bin/python
 
-import commands
 import re
 
 from string import *
 from ansible.module_utils.basic import *
 
-def checkSp(user,password,spa,spb):
-    naviseccli_path = "/opt/Navisphere/bin/naviseccli"
-    (rc, out, err) = module.run_command('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (naviseccli_path, user, password, spa))
+def runCommand(cmd):
+    (rc, out, err) = module.run_command(cmd)
+    if not rc:
+        module.log("OK " + cmd)
+        return (rc, out, err)
+    else:
+        module.log("FAILED " + cmd + " " + out)
+        module.fail_json(msg="FAILED " + cmd + " " + out)
+
+def checkSp(nscli,user,password,spa,spb):
+    (rc, out, err) = runCommand('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (nscli, user, password, spa))
     if rc == 0:
         return spa
     else:
         return spb
 
-def getPairs(gname):
-    (rc, out, err) = module.run_command('%s storagegroup -list -gname %s -host' % (naviseccli, gname), check_rc=True)
+def getNaviseccliCommand(nscli,user,password,spa,spb):
+    return ('%s -user %s -password %s -address %s -scope 0' % (nscli, user, password, checkSp(nscli,user,password,spa,spb)))
+
+def getHosts(gname):
+    (rc, out, err) = runCommand('%s storagegroup -list -gname %s -host' % (naviseccli, gname))
     retlist = []
     for l in re.split(r'\n', out):
         if re.search(r'^Host name.*', l):
@@ -23,8 +33,8 @@ def getPairs(gname):
             retlist.append(x[-1])
     return list(set(retlist))
 
-def getMaintainPairs(query,gname):
-    pairs = getPairs(gname)
+def getMaintainHosts(query,gname):
+    pairs = getHosts(gname)
     maintainlist = []
     for i in query:
         for j in pairs:
@@ -35,24 +45,24 @@ def getMaintainPairs(query,gname):
 def parseQuery(query):
     return re.split(r':', query)
 
-def removeHlus(query,gname):
-    removelist = list(set(getPairs(gname)) - set(getMaintainPairs(query,gname)))
+def removeHosts(query,gname):
+    removelist = list(set(getHosts(gname)) - set(getMaintainHosts(query,gname)))
     if not removelist:
         return 0
 
     for i in removelist:
-        (rc, out, err) = module.run_command('%s storagegroup -disconnecthost -gname %s -hosts %s -o' % (naviseccli, gname, i), check_rc=True)
+        (rc, out, err) = runCommand('%s storagegroup -disconnecthost -gname %s -hosts %s -o' % (naviseccli, gname, i))
 
     return 1
 
-def addHlus(query,gname):
-    addlist = filter(lambda s:s != '', list(set(query) - set(getMaintainPairs(query,gname))))
+def addHosts(query,gname):
+    addlist = filter(lambda s:s != '', list(set(query) - set(getMaintainHosts(query,gname))))
     if not addlist:
         return 0
 
     for i in addlist:
         if i != "":
-            (rc, out, err) = module.run_command('%s storagegroup -connecthost -gname %s -hosts %s -o' % (naviseccli, gname, i), check_rc=True)
+            (rc, out, err) = runCommand('%s storagegroup -connecthost -gname %s -hosts %s -o' % (naviseccli, gname, i))
     return 1
 
 def main():
@@ -60,6 +70,7 @@ def main():
     global module
     module = AnsibleModule(
         argument_spec = dict(
+            nscli = dict(default="/opt/Navisphere/bin/naviseccli", required=False),
             user = dict(required=True),
             password = dict(required=True),
             spa = dict(required=True),
@@ -69,6 +80,7 @@ def main():
             noremove = dict(default=False, required=False, type='bool')
         ),
     )
+    nscli = module.params['nscli']
     user = module.params['user']
     password = module.params['password']
     spa = module.params['spa']
@@ -77,30 +89,27 @@ def main():
     gname = module.params['gname']
     noremove = module.params['noremove']
 
-    ### Check SP
-    address = checkSp(user,password,spa,spb) 
-
     ### Set Global Variable naviseccli
     global naviseccli
-    naviseccli = "/opt/Navisphere/bin/naviseccli -user " + user + " -password " + password + " -address " + address + " -scope 0"
+    naviseccli = getNaviseccliCommand(nscli,user,password,spa,spb)
 
     rc = 0
 
     ### Remove Phase
     if not noremove:
-        rc += removeHlus(parseQuery(query),gname)
+        rc += removeHosts(parseQuery(query),gname)
 
     ### Add Phase
-    rc += addHlus(parseQuery(query),gname)
+    rc += addHosts(parseQuery(query),gname)
 
     if rc:
         res_args = dict(
-            changed = True, pair = getPairs(gname)
+            changed = True, pair = getHosts(gname)
         )
         module.exit_json(**res_args)
     else:
         res_args = dict(
-            changed = False, pair = getPairs(gname)
+            changed = False, pair = getHosts(gname)
         )
         module.exit_json(**res_args)
 

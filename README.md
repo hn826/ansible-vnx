@@ -28,3 +28,18 @@ Ansible-module of VNX
 |  |  |  |--main.yml		Parameters of Masking
 |--site.yml
 ```
+
+### Usage
+#### Step1. Clone repository
+```
+# git clone https://github.com/hn826/ansible-vnx.git
+```
+#### Step2. Edit Parameters (Optional)
+```
+# vi ansible-vnx/host_vars/admin.nsdom.local
+```
+#### Step3. Execute Playbook
+```
+# cd ansible-playbook
+# ansible-playbook -i hosts site.yml -vvv -k
+```
