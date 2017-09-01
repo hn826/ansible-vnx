@@ -6,9 +6,10 @@ from string import *
 from ansible.module_utils.basic import *
 
 def runCommand(cmd,isCheck=False):
+    module.log("Starting " + cmd)
     (rc, out, err) = module.run_command(cmd)
     if not rc:
-        module.log("OK " + cmd)
+        module.log("Succeeded " + cmd)
         return (rc, out, err)
     else:
         module.log("FAILED " + cmd + " " + out)
