@@ -5,14 +5,17 @@ import re
 from string import *
 from ansible.module_utils.basic import *
 
-def runCommand(cmd):
+def runCommand(cmd,isCheck=False):
     (rc, out, err) = module.run_command(cmd)
     if not rc:
         module.log("OK " + cmd)
         return (rc, out, err)
     else:
         module.log("FAILED " + cmd + " " + out)
-        module.fail_json(msg="FAILED " + cmd + " " + out)
+        if not isCheck:
+            module.fail_json(msg="FAILED " + cmd + " " + out)
+        else:
+            return (rc,out,err)
 
 def checkSp(nscli,user,password,spa,spb):
     (rc, out, err) = runCommand('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (nscli, user, password, spa))
@@ -25,7 +28,7 @@ def getNaviseccliCommand(nscli,user,password,spa,spb):
     return ('%s -user %s -password %s -address %s -scope 0' % (nscli, user, password, checkSp(nscli,user,password,spa,spb)))
 
 def createSg(gname):
-    (rc, out, err) = runCommand('%s storagegroup -list -gname %s' % (naviseccli, gname))
+    (rc, out, err) = runCommand('%s storagegroup -list -gname %s' % (naviseccli, gname),True)
     if rc != 0:
         (rc, out, err) = runCommand('%s storagegroup -create -gname %s' % (naviseccli, gname))
         return 1
