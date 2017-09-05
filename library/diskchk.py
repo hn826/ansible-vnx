@@ -5,14 +5,18 @@ import re
 from string import *
 from ansible.module_utils.basic import *
 
-def runCommand(cmd):
+def runCommand(cmd,isCheck=False):
+    module.log("Starting " + cmd)
     (rc, out, err) = module.run_command(cmd)
     if not rc:
-        module.log("OK " + cmd)
+        module.log("Succeeded " + cmd)
         return (rc, out, err)
     else:
         module.log("FAILED " + cmd + " " + out)
-        module.fail_json(msg="FAILED " + cmd + " " + out)
+        if not isCheck:
+            module.fail_json(msg="FAILED " + cmd + " " + out)
+        else:
+            return (rc,out,err)
 
 def checkSp(nscli,user,password,spa,spb):
     (rc, out, err) = runCommand('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (nscli, user, password, spa))
@@ -28,7 +32,7 @@ def checkDisk():
     (rc, out, err) = runCommand('%s getdisk -state' % (naviseccli))
     if re.search('Fault', out):
         module.fail_json(msg='FAILED Disk Check ' + cmd + ' ' + out)
-        
+
 def main():
     ### Parse Arguments
     global module
