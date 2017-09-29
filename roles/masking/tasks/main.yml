@@ -4,11 +4,11 @@
   with_subelements: "{{ elements }}"
 
 - name: Host Assign
-  sghost: user={{ item.0.user }} password={{ item.0.password }} spa={{ item.0.spa }} spb={{ item.0.spb }} gname={{ item.1.gname }} query={{ item.1.hosts }}
+  sghost: user={{ item.0.user }} password={{ item.0.password }} spa={{ item.0.spa }} spb={{ item.0.spb }} gname={{ item.1.gname }} query={{ item.1.hosts }} noremove=True
   with_subelements: "{{ elements }}"
   when: item.1.hosts is defined
 
 - name: HLU/ALU Assign
-  sglun: user={{ item.0.user }} password={{ item.0.password }} spa={{ item.0.spa }} spb={{ item.0.spb }} gname={{ item.1.gname }} query={{ item.1.hlualu }}
+  sglun: user={{ item.0.user }} password={{ item.0.password }} spa={{ item.0.spa }} spb={{ item.0.spb }} gname={{ item.1.gname }} query={{ item.1.hlualu }} noremove=True
   with_subelements: "{{ elements }}"
   when: item.1.hlualu is defined

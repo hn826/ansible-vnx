@@ -5,14 +5,18 @@ import re
 from string import *
 from ansible.module_utils.basic import *
 
-def runCommand(cmd):
+def runCommand(cmd,isCheck=False):
+    module.log("Starting " + cmd)
     (rc, out, err) = module.run_command(cmd)
     if not rc:
-        module.log("OK " + cmd)
+        module.log("Succeeded " + cmd)
         return (rc, out, err)
     else:
         module.log("FAILED " + cmd + " " + out)
-        module.fail_json(msg="FAILED " + cmd + " " + out)
+        if not isCheck:
+            module.fail_json(msg="FAILED " + cmd + " " + out)
+        else:
+            return (rc,out,err)
 
 def checkSp(nscli,user,password,spa,spb):
     (rc, out, err) = runCommand('%s -user %s -password %s -address %s -scope 0 getarrayuid' % (nscli, user, password, spa))
@@ -30,16 +34,17 @@ def getRev():
 
 def checkCache(rev):
     if rev == "31" or rev == "32":
-        (rc, out, err) = runCommand('%s getcache' % (naviseccli))
+        cmd='%s getcache' % (naviseccli)
     else:
-        (rc, out, err) = runCommand('%s cache -sp -info' % (naviseccli))
+        cmd='%s cache -sp -info' % (naviseccli)
+    (rc, out, err) = runCommand(cmd)
 
     for l in re.split(r'\n', out):
         if re.search(r'^.*Cache State.*', l):
             x=re.search(r'^.*Cache State.*', l).group().split(" ")
             if x[-1] != "Enabled":
                 module.fail_json(msg='FAILED Cache Check ' + cmd + ' ' + out)
-    
+
 def main():
     ### Parse Arguments
     global module
