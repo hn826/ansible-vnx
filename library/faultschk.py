@@ -29,7 +29,8 @@ def getNaviseccliCommand(nscli,user,password,spa,spb):
     return ('%s -user %s -password %s -address %s -scope 0' % (nscli, user, password, checkSp(nscli,user,password,spa,spb)))
 
 def checkFaultslist():
-    (rc, out, err) = runCommand('%s faults -list' % (naviseccli))
+    cmd='%s faults -list' % (naviseccli)
+    (rc, out, err) = runCommand(cmd)
     if not re.search('The array is operating normally.', out):
         module.fail_json(msg='FAILED Faults List Check ' + cmd + ' ' + out)
 

@@ -29,7 +29,8 @@ def getNaviseccliCommand(nscli,user,password,spa,spb):
     return ('%s -user %s -password %s -address %s -scope 0' % (nscli, user, password, checkSp(nscli,user,password,spa,spb)))
 
 def checkDisk():
-    (rc, out, err) = runCommand('%s getdisk -state' % (naviseccli))
+    cmd='%s getdisk -state' % (naviseccli)
+    (rc, out, err) = runCommand(cmd)
     if re.search('Fault', out):
         module.fail_json(msg='FAILED Disk Check ' + cmd + ' ' + out)
 

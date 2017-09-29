@@ -29,7 +29,8 @@ def getNaviseccliCommand(nscli,user,password,spa,spb):
     return ('%s -user %s -password %s -address %s -scope 0' % (nscli, user, password, checkSp(nscli,user,password,spa,spb)))
 
 def checkHw():
-    (rc, out, err) = runCommand('%s getcrus' % (naviseccli))
+    cmd='%s getcrus' % (naviseccli)
+    (rc, out, err) = runCommand(cmd)
     if re.search('Fault', out):
         module.fail_json(msg='FAILED Hardware Check ' + cmd + ' ' + out)
 

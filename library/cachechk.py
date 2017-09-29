@@ -34,9 +34,10 @@ def getRev():
 
 def checkCache(rev):
     if rev == "31" or rev == "32":
-        (rc, out, err) = runCommand('%s getcache' % (naviseccli))
+        cmd='%s getcache' % (naviseccli)
     else:
-        (rc, out, err) = runCommand('%s cache -sp -info' % (naviseccli))
+        cmd='%s cache -sp -info' % (naviseccli)
+    (rc, out, err) = runCommand(cmd)
 
     for l in re.split(r'\n', out):
         if re.search(r'^.*Cache State.*', l):
